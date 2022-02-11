@@ -53,12 +53,34 @@ class Channel {
   ///
   /// Client events can only be triggered on private and presence channels because they require authentication
   /// You can only trigger a client event once a subscription has been successfully registered with Channels.
-  Future trigger(String eventName) async {
+  // Future trigger(String eventName) async {
+  //   if (!eventName.startsWith('client-')) {
+  //     eventName = "client-$eventName";
+  //   }
+
+  //   await pusher._trigger(name, eventName);
+  // }
+
+  /// Once subscribed it is possible to trigger client events on a private
+  /// channel as long as client events have been activated for the a Pusher
+  /// application. There are a number of restrictions enforced with client
+  /// events. For full details see the
+  /// [documentation](http://pusher.com/docs/client_events)
+  ///
+  /// The [eventName] to trigger must have a `client-` prefix.
+  Future<void> trigger(String eventName, dynamic data) async {
     if (!eventName.startsWith('client-')) {
       eventName = "client-$eventName";
     }
 
-    await pusher._trigger(name, eventName);
+    await _channel!.invokeMethod(
+      'trigger',
+      jsonEncode({
+        'eventName': eventName,
+        'data': data.toString(),
+        'channelName': name,
+      }),
+    );
   }
 }
 
